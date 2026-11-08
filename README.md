@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img alt="Status" src="https://img.shields.io/badge/status-pra--pengembangan-orange">
+  <img alt="Status" src="https://img.shields.io/badge/status-dalam%20pengembangan-orange">
   <img alt="Target" src="https://img.shields.io/badge/closed%20beta-Q1%202027-3B2BD0">
   <img alt="Platform" src="https://img.shields.io/badge/platform-mobile--first-9B6BFF">
 </p>
@@ -156,16 +156,63 @@ Versi web (v1.1) memakai sidebar kiri dan tata letak dua panel: kalender di kiri
 
 ## Tech stack
 
-**TBD.** Tim belum memutuskan framework mobile, backend, database, layanan notifikasi, maupun model AI yang dipakai. Bagian ini akan diisi setelah keputusan arsitektur dibuat, bersama instruksi instalasi dan cara menjalankan proyek.
+| Bagian | Pilihan | Alasan |
+| --- | --- | --- |
+| App mobile | **Expo SDK 58 (React Native) + TypeScript** | Satu kode untuk iOS, Android, dan web (versi web v1.1), bisa dicoba langsung di HP lewat Expo Go |
+| Navigasi | Expo Router (berbasis file di `src/app/`) | Tab bar Kalender / Chat / Deadline + layar detail, form, profil |
+| Data | Zustand + AsyncStorage, **local-first** | Kalender, Deadline, Form, dan Cari tetap jalan offline |
+| Pengingat | `expo-notifications` (notifikasi lokal terjadwal) | Tombol aksi Tandai selesai / Tunda, ringkasan pagi, tetap jalan tanpa internet |
+| Parser chat | Parser aturan Bahasa Indonesia di perangkat (`src/lib/parser/`) | Jalan offline dan bisa dites; nanti dilengkapi model AI di server dengan alur draf yang sama |
+| Font | Bricolage Grotesque (judul) + Plus Jakarta Sans (teks) | Sesuai Figma |
+| Tes | Jest (`jest-expo`) | Parser dan logika kalender/deadline |
 
-Kebutuhan teknis yang perlu dijawab stack yang dipilih:
+Belum dipilih: backend (auth Google/Apple/email, sinkron antar perangkat, push cadangan), model AI, crash reporting. Struktur data `Schedule` sudah punya `id`, `createdAt`, dan `updatedAt` supaya siap disinkron.
 
-- App iOS + Android (versi web menyusul di v1.1).
-- Login Google, Apple, dan email.
-- Notifikasi lokal terjadwal dengan tombol aksi, plus push server sebagai cadangan.
-- Penyimpanan lokal untuk mode offline dan antrean sinkron.
-- Layanan AI untuk ekstraksi jadwal dari Bahasa Indonesia sehari-hari.
-- Crash reporting dan analitik anonim sejak closed beta.
+### Menjalankan proyek
+
+Butuh Node.js 20+ dan aplikasi **Expo Go** di HP.
+
+```bash
+npm install
+npm start          # scan QR code dengan Expo Go (Android) atau Kamera (iOS)
+npm run web        # buka versi web di browser
+npm test           # tes parser dan logika kalender
+npm run typecheck  # cek TypeScript
+```
+
+### Struktur kode
+
+```
+src/
+  app/                 Layar (Expo Router)
+    (tabs)/            kalender.tsx, chat.tsx, deadline.tsx + tab bar
+    onboarding/        Welcome 3 slide, kuesioner 5 langkah, profil, izin notifikasi
+    jadwal/            [id].tsx (detail), form.tsx (tambah/edit manual)
+    profil.tsx, pengaturan.tsx, cari.tsx, hapus-akun.tsx
+  components/          Komponen UI (kartu draf, tab bar, chip, toast, dll.)
+  lib/
+    parser/parse.ts    Ekstraksi jadwal dari Bahasa Indonesia sehari-hari
+    chatEngine.ts      Alur chat → draf → klarifikasi → simpan
+    occurrences.ts     Pengulangan jadwal, pengelompokan deadline
+    notifications.ts   Penjadwalan pengingat lokal
+    store.ts           State + penyimpanan lokal
+  theme/               Design token terang dan gelap
+```
+
+### Yang sudah jalan di versi 0.1
+
+- Onboarding: Welcome 3 slide, kuesioner 5 langkah (kategori, kebiasaan mencatat, pengingat default, jam aktif, baseline), profil lokal dengan persetujuan privasi, penjelasan izin notifikasi sebelum pop-up sistem.
+- Chat: beberapa kegiatan dalam satu pesan, kartu draf yang bisa dikoreksi (judul, kategori), tanda "?" untuk tebakan, klarifikasi satu hal per pesan, Simpan / Ubah / Batal / Simpan semua, tombol Isi manual saat gagal paham.
+- Parser memahami: besok, lusa, nanti malam, Kamis depan, minggu depan, akhir bulan, tgl 12, 12 Nov, 12/11, jam 3 sore, setengah 8, 15.00, rentang 10.00-11.40, WIB/WITA/WIT, tiap Senin, tiap hari, penting/urgent, lokasi "di ...", singkatan kampus (BasDat, Alin, SDA, laprak, TK, UTS, BEM).
+- Kalender: tampilan Bulan (titik/bar kategori, deadline bercincin), Minggu (timeline, acara bentrok berdampingan, garis waktu sekarang), Hari (ringkasan hari), filter kategori, tombol tambah manual.
+- Deadline: bagian Terlambat, Hari ini, Besok, Minggu ini, Nanti, Selesai; centang selesai dengan Urungkan; tunda; badge di tab.
+- Detail, form tambah/edit, jadwal berulang dengan pilihan "hanya kejadian ini / ini dan berikutnya / semua", hapus dengan toast Urungkan, duplikat.
+- Pengingat lokal terjadwal ulang otomatis saat jadwal berubah, tombol aksi di notifikasi, ringkasan pagi.
+- Profil, Pengaturan (pengingat, tampilan kalender, tema Terang/Gelap/Ikuti sistem, riwayat chat, analitik), Cari, Hapus akun di dalam app.
+
+### Berikutnya
+
+Tur fitur spotlight, login Google/Apple/email + backend dan sinkron, model AI untuk kalimat yang belum dipahami parser, riwayat chat per percakapan, gestur geser di Deadline, pemilih tanggal/jam native, kebijakan privasi, crash reporting.
 
 ## Desain
 
@@ -191,7 +238,7 @@ Dokumen perencanaan disusun untuk mata kuliah Perencanaan Produk Digital (PPD) d
 - Harga Kalibra Pro: Rp19.900/bulan (Launch Plan) atau Rp15.000/bulan (Laporan Individu)?
 - Closed beta khusus email `@ui.ac.id` atau terbuka untuk semua email?
 - Versi web dibangun bersamaan dengan app mobile atau setelah limited launch?
-- Pilihan tech stack (lihat [Tech stack](#tech-stack)).
+- Backend, layanan auth, dan model AI (lihat [Tech stack](#tech-stack)).
 
 ## Tim
 

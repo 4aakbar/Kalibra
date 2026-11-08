@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "Kalibra",
+    "slug": "kalibra",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "id.kalibra.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#3B2BD0",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "id.kalibra.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "backgroundColor": "#FFF9F0",
+          "dark": {
+            "backgroundColor": "#1F1C19"
+          }
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#3B2BD0"
+        }
+      ]
+    ],
+    "scheme": "kalibra",
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}
