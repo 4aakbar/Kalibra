@@ -6,7 +6,8 @@ plugins {
 
 android {
     namespace = "id.kalibra.kalibra"
-    compileSdk = flutter.compileSdkVersion
+    // flutter_local_notifications 23 butuh compile SDK 37 (tetap kompatibel ke Android lama).
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
