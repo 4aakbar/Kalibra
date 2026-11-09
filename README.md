@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img alt="Status" src="https://img.shields.io/badge/status-pra--pengembangan-orange">
+  <img alt="Status" src="https://img.shields.io/badge/status-dalam%20pengembangan-orange">
   <img alt="Target" src="https://img.shields.io/badge/closed%20beta-Q1%202027-3B2BD0">
   <img alt="Platform" src="https://img.shields.io/badge/platform-mobile--first-9B6BFF">
 </p>
@@ -156,16 +156,69 @@ Versi web (v1.1) memakai sidebar kiri dan tata letak dua panel: kalender di kiri
 
 ## Tech stack
 
-**TBD.** Tim belum memutuskan framework mobile, backend, database, layanan notifikasi, maupun model AI yang dipakai. Bagian ini akan diisi setelah keputusan arsitektur dibuat, bersama instruksi instalasi dan cara menjalankan proyek.
+| Bagian | Pilihan | Alasan |
+| --- | --- | --- |
+| App mobile | **Flutter 3.47 + Dart 3.13** | Satu kode untuk Android, iOS, dan web (versi web v1.1), performa native, UI digambar sendiri jadi tampilan sama persis di semua HP |
+| Navigasi | `Navigator` + rute bernama, tab bar custom | Tab bar Kalender / Chat / Deadline + layar detail, form, profil, pengaturan, cari |
+| Data | `provider` (ChangeNotifier) + `shared_preferences`, **local-first** | Kalender, Deadline, Form, dan Cari tetap jalan offline |
+| Pengingat | `flutter_local_notifications` + `timezone` | Notifikasi lokal terjadwal dengan tombol Tandai selesai / Tunda, ringkasan pagi, tetap jalan tanpa internet |
+| Parser chat | Parser aturan Bahasa Indonesia di perangkat (`lib/parser/`) | Jalan offline dan bisa dites; nanti dilengkapi model AI di server dengan alur draf yang sama |
+| Font | Bricolage Grotesque (judul) + Plus Jakarta Sans (teks), dibundel di `assets/fonts` (lisensi OFL) | Sesuai Figma |
+| Tes | `flutter_test` | Parser dan logika kalender/deadline |
 
-Kebutuhan teknis yang perlu dijawab stack yang dipilih:
+Belum dipilih: backend (auth Google/Apple/email, sinkron antar perangkat, push cadangan), model AI, crash reporting. Struktur data `Schedule` sudah punya `id`, `createdAt`, dan `updatedAt` supaya siap disinkron.
 
-- App iOS + Android (versi web menyusul di v1.1).
-- Login Google, Apple, dan email.
-- Notifikasi lokal terjadwal dengan tombol aksi, plus push server sebagai cadangan.
-- Penyimpanan lokal untuk mode offline dan antrean sinkron.
-- Layanan AI untuk ekstraksi jadwal dari Bahasa Indonesia sehari-hari.
-- Crash reporting dan analitik anonim sejak closed beta.
+### Menjalankan proyek
+
+Butuh [Flutter SDK](https://docs.flutter.dev/get-started/install) 3.47 atau lebih baru. Untuk HP, pakai emulator Android/iOS atau sambungkan HP dengan mode developer.
+
+```bash
+flutter pub get
+flutter run              # jalankan di HP/emulator yang tersambung
+flutter run -d chrome    # versi web (pengingat hanya jalan di Android/iOS)
+flutter test             # tes parser dan logika kalender
+flutter analyze          # cek kode
+```
+
+Setiap push dan pull request menjalankan GitHub Actions (`.github/workflows/flutter.yml`): analyze, tes, lalu build APK. APK-nya bisa diunduh dari tab **Actions** > run terbaru > **Artifacts** > `kalibra-apk`, lalu dipasang langsung di HP Android.
+
+### Struktur kode
+
+```
+lib/
+  main.dart                 Entry point, tema, rute
+  core/
+    models.dart             Schedule, Preferences, Occurrence
+    app_state.dart          State + penyimpanan lokal + alur chat → draf → klarifikasi → simpan
+    occurrences.dart        Pengulangan jadwal, pengelompokan deadline
+    notifications.dart      Penjadwalan pengingat lokal
+    dates.dart, categories.dart
+  parser/parser.dart        Ekstraksi jadwal dari Bahasa Indonesia sehari-hari
+  screens/                  home_shell (tab bar), chat, kalender, deadline, detail, form,
+                            onboarding, profil, pengaturan, cari, hapus_akun
+  ui/                       Design token terang/gelap, komponen (kartu, tombol, chip, toast)
+test/                       Tes parser dan kalender
+assets/                     Font dan logo
+android/, ios/, web/        Proyek native per platform
+```
+
+### Yang sudah jalan di versi 0.1
+
+- Onboarding: Welcome 3 slide, kuesioner 5 langkah (kategori, kebiasaan mencatat, pengingat default, jam aktif, baseline), profil lokal dengan persetujuan privasi, penjelasan izin notifikasi sebelum pop-up sistem.
+- Chat: beberapa kegiatan dalam satu pesan, kartu draf yang bisa dikoreksi (judul, kategori), tanda "?" untuk tebakan, klarifikasi satu hal per pesan, Simpan / Ubah / Batal / Simpan semua, tombol Isi manual saat gagal paham.
+- Parser memahami: besok, lusa, nanti malam, Kamis depan, minggu depan, akhir bulan, tgl 12, 12 Nov, 12/11, jam 3 sore, setengah 8, 15.00, rentang 10.00-11.40, WIB/WITA/WIT, tiap Senin, tiap hari, penting/urgent, lokasi "di ...", singkatan kampus (BasDat, Alin, SDA, laprak, TK, UTS, BEM).
+- Kalender: tampilan Bulan (titik/bar kategori, deadline bercincin), Minggu (timeline, acara bentrok berdampingan, garis waktu sekarang), Hari (ringkasan hari), filter kategori, tombol tambah manual.
+- Deadline: bagian Terlambat, Hari ini, Besok, Minggu ini, Nanti, Selesai; centang atau geser kanan untuk selesai dengan Urungkan; tunda; badge di tab.
+- Detail, form tambah/edit, jadwal berulang dengan pilihan "hanya kejadian ini / ini dan berikutnya / semua", hapus dengan toast Urungkan, duplikat.
+- Pengingat lokal terjadwal ulang otomatis saat jadwal berubah, tombol aksi di notifikasi, ringkasan pagi.
+- Profil, Pengaturan (pengingat, tampilan kalender, tema Terang/Gelap/Ikuti sistem, riwayat chat, analitik), Cari, Hapus akun di dalam app.
+- Tur fitur 6 langkah dengan spotlight setelah onboarding (bisa diputar ulang dari Pengaturan).
+- Halaman Kebijakan Privasi & Syarat di dalam app (versi pratinjau, menjelaskan penyimpanan lokal).
+- Pemilih tanggal dan jam bawaan di form.
+
+### Berikutnya
+
+Login Google/Apple/email + backend dan sinkron, model AI untuk kalimat yang belum dipahami parser, riwayat chat per percakapan, crash reporting, uji di HP Android/iOS sungguhan.
 
 ## Desain
 
@@ -191,7 +244,7 @@ Dokumen perencanaan disusun untuk mata kuliah Perencanaan Produk Digital (PPD) d
 - Harga Kalibra Pro: Rp19.900/bulan (Launch Plan) atau Rp15.000/bulan (Laporan Individu)?
 - Closed beta khusus email `@ui.ac.id` atau terbuka untuk semua email?
 - Versi web dibangun bersamaan dengan app mobile atau setelah limited launch?
-- Pilihan tech stack (lihat [Tech stack](#tech-stack)).
+- Backend, layanan auth, dan model AI (lihat [Tech stack](#tech-stack)).
 
 ## Tim
 
