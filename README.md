@@ -180,6 +180,8 @@ flutter test             # tes parser dan logika kalender
 flutter analyze          # cek kode
 ```
 
+Setiap push dan pull request menjalankan GitHub Actions (`.github/workflows/flutter.yml`): analyze, tes, lalu build APK. APK-nya bisa diunduh dari tab **Actions** > run terbaru > **Artifacts** > `kalibra-apk`, lalu dipasang langsung di HP Android.
+
 ### Struktur kode
 
 ```
@@ -210,10 +212,13 @@ android/, ios/, web/        Proyek native per platform
 - Detail, form tambah/edit, jadwal berulang dengan pilihan "hanya kejadian ini / ini dan berikutnya / semua", hapus dengan toast Urungkan, duplikat.
 - Pengingat lokal terjadwal ulang otomatis saat jadwal berubah, tombol aksi di notifikasi, ringkasan pagi.
 - Profil, Pengaturan (pengingat, tampilan kalender, tema Terang/Gelap/Ikuti sistem, riwayat chat, analitik), Cari, Hapus akun di dalam app.
+- Tur fitur 6 langkah dengan spotlight setelah onboarding (bisa diputar ulang dari Pengaturan).
+- Halaman Kebijakan Privasi & Syarat di dalam app (versi pratinjau, menjelaskan penyimpanan lokal).
+- Pemilih tanggal dan jam bawaan di form.
 
 ### Berikutnya
 
-Tur fitur spotlight, login Google/Apple/email + backend dan sinkron, model AI untuk kalimat yang belum dipahami parser, riwayat chat per percakapan, pemilih jam native, kebijakan privasi, crash reporting.
+Login Google/Apple/email + backend dan sinkron, model AI untuk kalimat yang belum dipahami parser, riwayat chat per percakapan, crash reporting, uji di HP Android/iOS sungguhan.
 
 ## Desain
 

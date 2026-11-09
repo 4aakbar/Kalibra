@@ -158,8 +158,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ),
         const SizedBox(height: 12),
         Center(
-          child: Text('Dengan lanjut, kamu setuju dengan Syarat & Kebijakan Privasi Kalibra.',
-              textAlign: TextAlign.center, style: KText.caption.copyWith(color: c.inkMuted)),
+          child: Semantics(
+            link: true,
+            label: 'Baca Syarat dan Kebijakan Privasi',
+            child: GestureDetector(
+              onTap: () => Navigator.pushNamed(context, '/privasi'),
+              child: Text.rich(
+                TextSpan(style: KText.caption.copyWith(color: c.inkMuted), children: [
+                  const TextSpan(text: 'Dengan lanjut, kamu setuju dengan '),
+                  TextSpan(
+                    text: 'Syarat & Kebijakan Privasi',
+                    style: TextStyle(color: c.primary, decoration: TextDecoration.underline),
+                  ),
+                  const TextSpan(text: ' Kalibra.'),
+                ]),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
         ),
       ]),
     );
@@ -404,6 +420,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                     ),
                   ]),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 28),
+                child: TextButton(
+                  onPressed: () => Navigator.pushNamed(context, '/privasi'),
+                  child: Text('Baca Syarat & Kebijakan Privasi',
+                      style: KText.label.copyWith(color: c.primary, decoration: TextDecoration.underline)),
                 ),
               ),
             ]),

@@ -9,6 +9,7 @@ import '../core/models.dart';
 import '../core/occurrences.dart';
 import '../ui/schedule_items.dart';
 import '../ui/theme.dart';
+import '../ui/tour.dart';
 import '../ui/widgets.dart';
 import 'deadline_screen.dart' show openNewForm;
 import 'home_shell.dart';
@@ -85,6 +86,7 @@ class _KalenderScreenState extends State<KalenderScreen> {
             Row(children: [
               Expanded(
                 child: Segmented<CalendarView>(
+                  key: TourKeys.viewSwitch,
                   value: view,
                   options: const [(CalendarView.bulan, 'Bulan'), (CalendarView.minggu, 'Minggu'), (CalendarView.hari, 'Hari')],
                   onChanged: (v) => app.setPrefs((p) => p.copyWith(calendarView: v)),

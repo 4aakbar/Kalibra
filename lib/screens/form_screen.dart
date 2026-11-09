@@ -224,6 +224,28 @@ class _FormScreenState extends State<FormScreen> {
         ]),
       );
 
+  Future<void> _pickTime(TextEditingController ctrl) async {
+    final cur = parseClock(ctrl.text) ?? (h: 9, m: 0);
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: cur.h, minute: cur.m),
+      helpText: 'Pilih jam',
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+        child: child!,
+      ),
+    );
+    if (picked != null) {
+      setState(() => ctrl.text = '${picked.hour.toString().padLeft(2, '0')}.${picked.minute.toString().padLeft(2, '0')}');
+    }
+  }
+
+  Widget _clockButton(TextEditingController ctrl, String label) => IconButton(
+        tooltip: label,
+        icon: Icon(Icons.schedule_rounded, color: context.k.inkSoft),
+        onPressed: () => _pickTime(ctrl),
+      );
+
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
@@ -338,6 +360,7 @@ class _FormScreenState extends State<FormScreen> {
                           hint: '15.00',
                           maxLength: 5,
                           error: _timeError,
+                          suffix: _clockButton(startText, 'Pilih jam mulai'),
                           keyboardType: TextInputType.datetime,
                           onChanged: (_) => setState(() {}),
                         ),
@@ -351,6 +374,7 @@ class _FormScreenState extends State<FormScreen> {
                             hint: '16.00',
                             maxLength: 5,
                             error: _endError,
+                            suffix: _clockButton(endText, 'Pilih jam selesai'),
                             keyboardType: TextInputType.datetime,
                             onChanged: (_) => setState(() {}),
                           ),

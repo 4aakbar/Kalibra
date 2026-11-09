@@ -5,6 +5,7 @@ import '../core/app_state.dart';
 import '../core/models.dart';
 import '../core/occurrences.dart';
 import '../ui/theme.dart';
+import '../ui/tour.dart';
 import 'chat_screen.dart';
 import 'deadline_screen.dart';
 import 'kalender_screen.dart';
@@ -25,16 +26,29 @@ class HomeShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<int>(
-      valueListenable: homeTab,
-      builder: (context, tab, _) => Scaffold(
-        body: SafeArea(
-          bottom: false,
-          child: IndexedStack(index: tab, children: const [KalenderScreen(), ChatScreen(), DeadlineScreen()]),
+    final showTour = context.select<AppState, bool>((a) => a.onboarded && !a.tourDone);
+    return Stack(children: [
+      ValueListenableBuilder<int>(
+        valueListenable: homeTab,
+        builder: (context, tab, _) => Scaffold(
+          body: SafeArea(
+            bottom: false,
+            child: IndexedStack(index: tab, children: const [KalenderScreen(), ChatScreen(), DeadlineScreen()]),
+          ),
+          bottomNavigationBar: _TabBar(current: tab, onTap: (i) => homeTab.value = i),
         ),
-        bottomNavigationBar: _TabBar(current: tab, onTap: (i) => homeTab.value = i),
       ),
-    );
+      if (showTour)
+        Positioned.fill(
+          child: TourOverlay(
+            onTab: (i) => homeTab.value = i,
+            onDone: () {
+              homeTab.value = 1;
+              context.read<AppState>().setTourDone(true);
+            },
+          ),
+        ),
+    ]);
   }
 }
 
@@ -54,6 +68,7 @@ class _TabBar extends StatelessWidget {
       final focused = current == i;
       final color = focused ? c.primary : c.inkMuted;
       return Expanded(
+        key: i == 0 ? TourKeys.kalenderTab : TourKeys.deadlineTab,
         child: Semantics(
           selected: focused,
           button: true,
@@ -115,6 +130,7 @@ class _TabBar extends StatelessWidget {
                 Transform.translate(
                   offset: const Offset(0, -22),
                   child: Container(
+                    key: TourKeys.chatTab,
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(

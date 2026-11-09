@@ -8,6 +8,7 @@ import '../core/models.dart';
 import '../parser/parser.dart';
 import '../ui/schedule_items.dart';
 import '../ui/theme.dart';
+import '../ui/tour.dart';
 import '../ui/widgets.dart';
 import 'form_screen.dart';
 import 'home_shell.dart';
@@ -91,7 +92,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final canSend = _text.text.trim().isNotEmpty;
 
     return Column(children: [
-      TabHeader(title: 'Chat', actions: [
+      TabHeader(title: 'Chat', avatarKey: TourKeys.avatar, actions: [
         IconButton(
           tooltip: 'Percakapan baru',
           icon: const Icon(Icons.edit_square, size: 24),
@@ -130,6 +131,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ),
       Padding(
+        key: TourKeys.composer,
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
         child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
           Expanded(
@@ -321,7 +323,7 @@ class _SaveAll extends StatelessWidget {
         for (final i in ready) {
           app.saveDraft(m.id, i);
         }
-        showToast(context, '${ready.length} jadwal tersimpan');
+        showToast(context, '${ready.length} jadwal tersimpan', aboveComposer: true);
       },
     );
   }
@@ -444,7 +446,10 @@ class _DraftCardState extends State<DraftCard> {
 
     void onSave() {
       final id = app.saveDraft(widget.messageId, widget.index);
-      if (id != null) showToast(context, 'Tersimpan ke Kalender', actionLabel: 'Lihat', onAction: () => openDetail(context, id));
+      if (id != null) {
+        showToast(context, 'Tersimpan ke Kalender',
+            actionLabel: 'Lihat', onAction: () => openDetail(context, id), aboveComposer: true);
+      }
     }
 
     void onEdit() {

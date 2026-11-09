@@ -8,6 +8,7 @@ import '../core/categories.dart';
 import '../core/models.dart';
 import '../core/notifications.dart';
 import '../ui/theme.dart';
+import 'home_shell.dart';
 import '../ui/widgets.dart';
 
 class PengaturanScreen extends StatelessWidget {
@@ -119,7 +120,7 @@ class PengaturanScreen extends StatelessWidget {
                   label: 'Izinkan analitik anonim',
                   trailing: Switch(value: prefs.analytics, onChanged: (v) => set((p) => p.copyWith(analytics: v))),
                 ),
-                const ListRow(icon: Icons.shield_outlined, label: 'Kebijakan privasi', value: 'Segera'),
+                ListRow(icon: Icons.shield_outlined, label: 'Kebijakan privasi & syarat', onTap: () => Navigator.pushNamed(context, '/privasi')),
                 ListRow(
                   icon: Icons.person_off_outlined,
                   label: 'Hapus akun',
@@ -132,6 +133,15 @@ class PengaturanScreen extends StatelessWidget {
                   icon: Icons.mail_outline_rounded,
                   label: 'Laporkan masalah',
                   onTap: () => launchUrl(Uri.parse('mailto:?subject=Masukan%20Kalibra%20v0.1.0')),
+                ),
+                ListRow(
+                  icon: Icons.slideshow_rounded,
+                  label: 'Putar ulang tur fitur',
+                  onTap: () {
+                    homeTab.value = 1;
+                    app.setTourDone(false);
+                    Navigator.popUntil(context, (r) => r.isFirst);
+                  },
                 ),
                 const ListRow(icon: Icons.info_outline_rounded, label: 'Versi', value: '0.1.0 (pratinjau)'),
               ]),

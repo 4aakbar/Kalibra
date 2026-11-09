@@ -140,6 +140,9 @@ class AppState extends ChangeNotifier {
 
   bool loaded = false;
   bool onboarded = false;
+
+  /// Tur fitur sudah dilihat (atau dilewati).
+  bool tourDone = false;
   Preferences prefs = const Preferences();
   List<Schedule> schedules = [];
   List<ChatMessage> chat = [];
@@ -161,6 +164,7 @@ class AppState extends ChangeNotifier {
       try {
         final j = jsonDecode(raw) as Map<String, dynamic>;
         onboarded = j['onboarded'] as bool? ?? false;
+        tourDone = j['tourDone'] as bool? ?? onboarded;
         prefs = Preferences.fromJson(Map<String, dynamic>.from(j['prefs'] as Map? ?? {}));
         schedules = (j['schedules'] as List? ?? []).map((s) => Schedule.fromJson(Map<String, dynamic>.from(s as Map))).toList();
         chat = (j['chat'] as List? ?? []).map((m) => ChatMessage.fromJson(Map<String, dynamic>.from(m as Map))).toList();
@@ -184,6 +188,7 @@ class AppState extends ChangeNotifier {
       _key,
       jsonEncode({
         'onboarded': onboarded,
+        'tourDone': tourDone,
         'prefs': prefs.toJson(),
         'schedules': schedules.map((s) => s.toJson()).toList(),
         'chat': chat.map((m) => m.toJson()).toList(),
@@ -203,9 +208,15 @@ class AppState extends ChangeNotifier {
     _changed();
   }
 
+  void setTourDone(bool done) {
+    tourDone = done;
+    _changed();
+  }
+
   /// Keluar / hapus akun: hapus semua data lokal.
   Future<void> resetAll() async {
     onboarded = false;
+    tourDone = false;
     prefs = const Preferences();
     schedules = [];
     chat = [];

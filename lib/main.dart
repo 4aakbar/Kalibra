@@ -13,6 +13,7 @@ import 'screens/hapus_akun_screen.dart';
 import 'screens/home_shell.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/pengaturan_screen.dart';
+import 'screens/privasi_screen.dart';
 import 'screens/profil_screen.dart';
 import 'ui/theme.dart';
 
@@ -74,6 +75,7 @@ class KalibraApp extends StatelessWidget {
           '/pengaturan' => const PengaturanScreen(),
           '/cari' => const CariScreen(),
           '/hapus-akun' => const HapusAkunScreen(),
+          '/privasi' => const PrivasiScreen(),
           _ => const HomeShell(),
         };
         return MaterialPageRoute(

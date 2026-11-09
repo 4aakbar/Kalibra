@@ -324,9 +324,10 @@ class Avatar extends StatelessWidget {
 
 /// Header bersama tiga tab: judul kiri, aksi, Cari, avatar profil.
 class TabHeader extends StatelessWidget {
-  const TabHeader({super.key, required this.title, this.actions = const []});
+  const TabHeader({super.key, required this.title, this.actions = const [], this.avatarKey});
   final String title;
   final List<Widget> actions;
+  final Key? avatarKey;
 
   @override
   Widget build(BuildContext context) {
@@ -341,7 +342,7 @@ class TabHeader extends StatelessWidget {
           onPressed: () => Navigator.pushNamed(context, '/cari'),
         ),
         const SizedBox(width: 4),
-        Avatar(onTap: () => Navigator.pushNamed(context, '/profil')),
+        Avatar(key: avatarKey, onTap: () => Navigator.pushNamed(context, '/profil')),
       ]),
     );
   }
@@ -477,13 +478,16 @@ class KFab extends StatelessWidget {
 }
 
 /// Toast di atas tab bar dengan aksi Urungkan (5 detik).
-void showToast(BuildContext context, String message, {String? actionLabel, VoidCallback? onAction}) {
+///
+/// [aboveComposer] menaikkan toast supaya tidak menutupi kolom ketik di Chat.
+void showToast(BuildContext context, String message, {String? actionLabel, VoidCallback? onAction, bool aboveComposer = false}) {
   final messenger = ScaffoldMessenger.of(context);
   messenger.hideCurrentSnackBar();
   messenger.showSnackBar(SnackBar(
     content: Text(message),
     duration: const Duration(seconds: 5),
     persist: false,
+    margin: aboveComposer ? const EdgeInsets.fromLTRB(16, 0, 16, 76) : null,
     action: actionLabel == null ? null : SnackBarAction(label: actionLabel, onPressed: onAction ?? () {}),
   ));
 }
@@ -502,8 +506,10 @@ class KField extends StatelessWidget {
     this.autofocus = false,
     this.onChanged,
     this.textCapitalization = TextCapitalization.sentences,
+    this.suffix,
   });
 
+  final Widget? suffix;
   final String label;
   final TextEditingController controller;
   final String? hint;
@@ -537,6 +543,7 @@ class KField extends StatelessWidget {
           hintText: hint,
           hintStyle: KText.body.copyWith(color: c.inkMuted),
           errorText: error,
+          suffixIcon: suffix,
           counterText: '',
           filled: true,
           fillColor: c.surface,
