@@ -158,45 +158,46 @@ Versi web (v1.1) memakai sidebar kiri dan tata letak dua panel: kalender di kiri
 
 | Bagian | Pilihan | Alasan |
 | --- | --- | --- |
-| App mobile | **Expo SDK 58 (React Native) + TypeScript** | Satu kode untuk iOS, Android, dan web (versi web v1.1), bisa dicoba langsung di HP lewat Expo Go |
-| Navigasi | Expo Router (berbasis file di `src/app/`) | Tab bar Kalender / Chat / Deadline + layar detail, form, profil |
-| Data | Zustand + AsyncStorage, **local-first** | Kalender, Deadline, Form, dan Cari tetap jalan offline |
-| Pengingat | `expo-notifications` (notifikasi lokal terjadwal) | Tombol aksi Tandai selesai / Tunda, ringkasan pagi, tetap jalan tanpa internet |
-| Parser chat | Parser aturan Bahasa Indonesia di perangkat (`src/lib/parser/`) | Jalan offline dan bisa dites; nanti dilengkapi model AI di server dengan alur draf yang sama |
-| Font | Bricolage Grotesque (judul) + Plus Jakarta Sans (teks) | Sesuai Figma |
-| Tes | Jest (`jest-expo`) | Parser dan logika kalender/deadline |
+| App mobile | **Flutter 3.47 + Dart 3.13** | Satu kode untuk Android, iOS, dan web (versi web v1.1), performa native, UI digambar sendiri jadi tampilan sama persis di semua HP |
+| Navigasi | `Navigator` + rute bernama, tab bar custom | Tab bar Kalender / Chat / Deadline + layar detail, form, profil, pengaturan, cari |
+| Data | `provider` (ChangeNotifier) + `shared_preferences`, **local-first** | Kalender, Deadline, Form, dan Cari tetap jalan offline |
+| Pengingat | `flutter_local_notifications` + `timezone` | Notifikasi lokal terjadwal dengan tombol Tandai selesai / Tunda, ringkasan pagi, tetap jalan tanpa internet |
+| Parser chat | Parser aturan Bahasa Indonesia di perangkat (`lib/parser/`) | Jalan offline dan bisa dites; nanti dilengkapi model AI di server dengan alur draf yang sama |
+| Font | Bricolage Grotesque (judul) + Plus Jakarta Sans (teks), dibundel di `assets/fonts` (lisensi OFL) | Sesuai Figma |
+| Tes | `flutter_test` | Parser dan logika kalender/deadline |
 
 Belum dipilih: backend (auth Google/Apple/email, sinkron antar perangkat, push cadangan), model AI, crash reporting. Struktur data `Schedule` sudah punya `id`, `createdAt`, dan `updatedAt` supaya siap disinkron.
 
 ### Menjalankan proyek
 
-Butuh Node.js 20+ dan aplikasi **Expo Go** di HP.
+Butuh [Flutter SDK](https://docs.flutter.dev/get-started/install) 3.47 atau lebih baru. Untuk HP, pakai emulator Android/iOS atau sambungkan HP dengan mode developer.
 
 ```bash
-npm install
-npm start          # scan QR code dengan Expo Go (Android) atau Kamera (iOS)
-npm run web        # buka versi web di browser
-npm test           # tes parser dan logika kalender
-npm run typecheck  # cek TypeScript
+flutter pub get
+flutter run              # jalankan di HP/emulator yang tersambung
+flutter run -d chrome    # versi web (pengingat hanya jalan di Android/iOS)
+flutter test             # tes parser dan logika kalender
+flutter analyze          # cek kode
 ```
 
 ### Struktur kode
 
 ```
-src/
-  app/                 Layar (Expo Router)
-    (tabs)/            kalender.tsx, chat.tsx, deadline.tsx + tab bar
-    onboarding/        Welcome 3 slide, kuesioner 5 langkah, profil, izin notifikasi
-    jadwal/            [id].tsx (detail), form.tsx (tambah/edit manual)
-    profil.tsx, pengaturan.tsx, cari.tsx, hapus-akun.tsx
-  components/          Komponen UI (kartu draf, tab bar, chip, toast, dll.)
-  lib/
-    parser/parse.ts    Ekstraksi jadwal dari Bahasa Indonesia sehari-hari
-    chatEngine.ts      Alur chat → draf → klarifikasi → simpan
-    occurrences.ts     Pengulangan jadwal, pengelompokan deadline
-    notifications.ts   Penjadwalan pengingat lokal
-    store.ts           State + penyimpanan lokal
-  theme/               Design token terang dan gelap
+lib/
+  main.dart                 Entry point, tema, rute
+  core/
+    models.dart             Schedule, Preferences, Occurrence
+    app_state.dart          State + penyimpanan lokal + alur chat → draf → klarifikasi → simpan
+    occurrences.dart        Pengulangan jadwal, pengelompokan deadline
+    notifications.dart      Penjadwalan pengingat lokal
+    dates.dart, categories.dart
+  parser/parser.dart        Ekstraksi jadwal dari Bahasa Indonesia sehari-hari
+  screens/                  home_shell (tab bar), chat, kalender, deadline, detail, form,
+                            onboarding, profil, pengaturan, cari, hapus_akun
+  ui/                       Design token terang/gelap, komponen (kartu, tombol, chip, toast)
+test/                       Tes parser dan kalender
+assets/                     Font dan logo
+android/, ios/, web/        Proyek native per platform
 ```
 
 ### Yang sudah jalan di versi 0.1
@@ -205,14 +206,14 @@ src/
 - Chat: beberapa kegiatan dalam satu pesan, kartu draf yang bisa dikoreksi (judul, kategori), tanda "?" untuk tebakan, klarifikasi satu hal per pesan, Simpan / Ubah / Batal / Simpan semua, tombol Isi manual saat gagal paham.
 - Parser memahami: besok, lusa, nanti malam, Kamis depan, minggu depan, akhir bulan, tgl 12, 12 Nov, 12/11, jam 3 sore, setengah 8, 15.00, rentang 10.00-11.40, WIB/WITA/WIT, tiap Senin, tiap hari, penting/urgent, lokasi "di ...", singkatan kampus (BasDat, Alin, SDA, laprak, TK, UTS, BEM).
 - Kalender: tampilan Bulan (titik/bar kategori, deadline bercincin), Minggu (timeline, acara bentrok berdampingan, garis waktu sekarang), Hari (ringkasan hari), filter kategori, tombol tambah manual.
-- Deadline: bagian Terlambat, Hari ini, Besok, Minggu ini, Nanti, Selesai; centang selesai dengan Urungkan; tunda; badge di tab.
+- Deadline: bagian Terlambat, Hari ini, Besok, Minggu ini, Nanti, Selesai; centang atau geser kanan untuk selesai dengan Urungkan; tunda; badge di tab.
 - Detail, form tambah/edit, jadwal berulang dengan pilihan "hanya kejadian ini / ini dan berikutnya / semua", hapus dengan toast Urungkan, duplikat.
 - Pengingat lokal terjadwal ulang otomatis saat jadwal berubah, tombol aksi di notifikasi, ringkasan pagi.
 - Profil, Pengaturan (pengingat, tampilan kalender, tema Terang/Gelap/Ikuti sistem, riwayat chat, analitik), Cari, Hapus akun di dalam app.
 
 ### Berikutnya
 
-Tur fitur spotlight, login Google/Apple/email + backend dan sinkron, model AI untuk kalimat yang belum dipahami parser, riwayat chat per percakapan, gestur geser di Deadline, pemilih tanggal/jam native, kebijakan privasi, crash reporting.
+Tur fitur spotlight, login Google/Apple/email + backend dan sinkron, model AI untuk kalimat yang belum dipahami parser, riwayat chat per percakapan, pemilih jam native, kebijakan privasi, crash reporting.
 
 ## Desain
 
